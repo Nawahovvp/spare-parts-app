@@ -8,7 +8,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://code.jquery.com https://opensheet.elk.sh https://docs.google.com https://script.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https: blob:; connect-src 'self' https://opensheet.elk.sh https://docs.google.com https://script.google.com; frame-src https://docs.google.com; object-src 'none'; base-uri 'self'; form-action 'self' https://docs.google.com;">
     <!-- Additional security headers via meta -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <meta http-equiv="X-Frame-Options" content="DENY">
+    <!-- Removed: <meta http-equiv="X-Frame-Options" content="DENY"> (Invalid in meta tag) -->
     <meta http-equiv="X-XSS-Protection" content="1; mode=block">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <!-- Verification meta to help with Safe Browsing (add your site verification if available) -->
@@ -29,13 +29,13 @@
         <input type="text" id="username" placeholder="รหัสพนักงาน" />
         <div class="password-container">
           <input type="password" id="password" placeholder="รหัสผ่าน (ให้นึกก่อน)" />
-          <i class="fas fa-eye-slash" id="togglePassword" onclick="togglePasswordVisibility()"></i>
+          <i class="fas fa-eye-slash" id="togglePassword"></i> <!-- Removed onclick -->
         </div>
         <div class="remember-me">
           <input type="checkbox" id="rememberMe" />
           <label for="rememberMe">Remember me</label>
         </div>
-        <button onclick="handleLogin()">เข้าสู่ระบบ</button>
+        <button id="loginBtn">เข้าสู่ระบบ</button> <!-- Removed onclick, added id -->
         <div id="loginError" class="error">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!</div>
       </div>
     </div>
