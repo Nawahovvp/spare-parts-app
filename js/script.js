@@ -50,82 +50,6 @@ async function handleLogin() {
     const expectedPassword = username.slice(-4);
     const employee = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === username && expectedPassword === password);
     if (employee && employee.Name) {
-      // เพิ่ม popup แสดงความเสียใจหลัง login สำเร็จ (เวอร์ชันปรับแต่งสวยงาม)
-      await Swal.fire({
-        title: 'ขอแสดงความเสียใจ',
-        html: `
-          <div style="text-align: center; padding: 25px; background: linear-gradient(135deg, #f8f9fa, #e9ecef, #dee2e6); border-radius: 20px; margin: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); border: 2px solid #ced4da; position: relative; overflow: hidden;">
-            <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #343a40, #6c757d, #343a40);"></div>
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Sirikit_Queen_of_Thailand.jpg/800px-Sirikit_Queen_of_Thailand.jpg" alt="พระบรมฉายาลักษณ์" style="width:100%; max-width:320px; margin-bottom:20px; border-radius: 15px; box-shadow: 0 6px 15px rgba(0,0,0,0.2); filter: grayscale(20%) sepia(15%) brightness(1.05); transition: transform 0.4s ease, box-shadow 0.4s ease; cursor: pointer;">
-            <div style="font-size: 20px; color: #2c3e50; font-weight: bold; line-height: 1.4; margin-bottom: 12px; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">
-              ขอแสดงความเสียใจกับประชาชนชาวไทยทั้งมวล
-            </div>
-            <div style="font-size: 16px; color: #5a6c7d; line-height: 1.6; font-style: italic; margin-bottom: 15px; font-family: 'Kanit', sans-serif;">
-              ต่อการสวรรคตของสมเด็จพระนางเจ้าสิริกิติ์ พระบรมราชินีนาถ พระบรมราชชนนีพันปีหลวง
-            </div>
-            <div style="background: rgba(255,255,255,0.7); padding: 10px; border-radius: 10px; border-left: 4px solid #6c757d; font-size: 14px; color: #495057; font-weight: 500;">
-              วันที่ 27 ตุลาคม พ.ศ. 2568
-            </div>
-          </div>
-        `,
-        icon: null,
-        confirmButtonText: 'รับทราบและดำเนินการต่อ',
-        confirmButtonColor: '#495057',
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        width: '500px',
-        backdrop: 'rgba(0,0,0,0.4) blur(5px)',
-        customClass: {
-          popup: 'swal2-popup memorial-popup',
-          title: 'swal2-title memorial-title',
-          confirmButton: 'swal2-confirm memorial-btn'
-        },
-        didOpen: () => {
-          const swalPopup = document.querySelector('.swal2-popup');
-          if (swalPopup) {
-            swalPopup.style.background = 'linear-gradient(135deg, #f8f9fa, #e9ecef)';
-            swalPopup.style.borderRadius = '20px';
-            swalPopup.style.textAlign = 'center';
-            swalPopup.style.fontFamily = '"Kanit", sans-serif';
-            swalPopup.style.animation = 'fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-            // เพิ่ม subtle animation สำหรับ popup
-            swalPopup.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-              swalPopup.style.transform = 'scale(1)';
-              swalPopup.style.transition = 'transform 0.3s ease';
-            }, 100);
-          }
-          const title = document.querySelector('.swal2-title');
-          if (title) {
-            title.style.color = '#2c3e50';
-            title.style.fontSize = '24px';
-            title.style.fontWeight = 'bold';
-            title.style.marginBottom = '15px';
-            title.style.textShadow = '0 2px 4px rgba(0,0,0,0.1)';
-          }
-          const img = swalPopup.querySelector('img');
-          if (img) {
-            img.addEventListener('mouseenter', () => {
-              img.style.transform = 'scale(1.05)';
-              img.style.filter = 'grayscale(10%) sepia(10%) brightness(1.1)';
-            });
-            img.addEventListener('mouseleave', () => {
-              img.style.transform = 'scale(1)';
-              img.style.filter = 'grayscale(20%) sepia(15%) brightness(1.05)';
-            });
-          }
-          // เพิ่ม particle effect หรือ subtle glow ถ้าต้องการ (แต่ใช้ CSS เท่านั้น)
-          const container = swalPopup.querySelector('div');
-          if (container) {
-            container.style.position = 'relative';
-            container.innerHTML += '<div style="position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent); z-index: -1; border-radius: 22px;"></div>';
-          }
-        },
-        didClose: () => {
-          document.body.style.overflow = 'auto';
-        }
-      });
-
       localStorage.setItem('isLoggedIn', 'true');
       localStorage.setItem('username', username);
       localStorage.setItem('userName', employee.Name);
@@ -153,6 +77,7 @@ async function handleLogin() {
     console.error('Login error:', error);
   }
 }
+
 function checkLoginStatus() {
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
   const savedUsername = localStorage.getItem('username');
@@ -1814,3 +1739,4 @@ document.addEventListener('DOMContentLoaded', () => {
 if (appContent.classList.contains('logged-in')) {
   loadData();
 }
+  
