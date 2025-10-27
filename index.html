@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>ระบบขอเบิกอะไหล่คลังสินค้านวนคร</title>
+    <!-- Enhanced Content Security Policy to reduce phishing risks -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://code.jquery.com https://opensheet.elk.sh https://docs.google.com https://script.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https: blob:; connect-src 'self' https://opensheet.elk.sh https://docs.google.com https://script.google.com; frame-src https://docs.google.com; object-src 'none'; base-uri 'self'; form-action 'self' https://docs.google.com;">
+    <!-- Additional security headers via meta -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <!-- Verification meta to help with Safe Browsing (add your site verification if available) -->
+    <meta name="google-site-verification" content="your-verification-token-if-any">
+    <!-- Clear description to indicate legitimacy -->
+    <meta name="description" content="ระบบภายในสำหรับขอเบิกอะไหล่คลังสินค้านวนคร - เครื่องมือสำหรับพนักงานเท่านั้น ไม่ใช่เว็บไซต์ภายนอก">
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <!-- Login Modal -->
+    <div id="loginModal" class="login-modal active">
+      <div class="login-content">
+        <h2>เข้าสู่ระบบ</h2>
+        <input type="text" id="username" placeholder="รหัสพนักงาน" />
+        <div class="password-container">
+          <input type="password" id="password" placeholder="รหัสผ่าน (ให้นึกก่อน)" />
+          <i class="fas fa-eye-slash" id="togglePassword" onclick="togglePasswordVisibility()"></i>
+        </div>
+        <div class="remember-me">
+          <input type="checkbox" id="rememberMe" />
+          <label for="rememberMe">Remember me</label>
+        </div>
+        <button onclick="handleLogin()">เข้าสู่ระบบ</button>
+        <div id="loginError" class="error">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!</div>
+      </div>
+    </div>
+    <!-- App Content -->
+    <div id="appContent" class="app-content">
+      <div class="header">
+        <div style="display: flex; align-items: center; gap: 15px;">
+          <button class="qrcode-header-btn" onclick="showQRCode()">
+            <i class="fas fa-qrcode"></i> QR
+          </button>
+          <h1>ระบบขอเบิกอะไหล่คลังสินค้านวนคร</h1>
+        </div>
+        <div class="header-right">
+          <button class="logout-btn" onclick="handleLogout()" id="logoutBtn" style="display: none;">
+            <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+          </button>
+          <span id="userNameSmall" class="user-name-small"></span>
+        </div>
+      </div>
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <span>กำลังโหลดข้อมูล...</span>
+      </div>
+      <div class="container">
+        <!-- Added disclaimer to clarify this is an internal tool -->
+        <div class="disclaimer">
+          ⚠️ ระบบนี้สำหรับคลังสินค้าวิภาวดี 62 เท่านั้น | ข้อมูลถูกส่งไปยัง Google Forms อย่างปลอดภัย | หากมีข้อสงสัย ติดต่อ คลังสินค้าวิภาวดี 62
+        </div>
+        <div class="tabs">
+          <button class="tab-button active" id="tab-parts" onclick="showTab('parts')">
+            ค้นหาอะไหล่เพื่อเบิก
+          </button>
+          <button class="tab-button" id="tab-today" onclick="showTab('today')">
+            รายการเบิกประจำวันนี้
+          </button>
+          <button class="tab-button" id="tab-all" onclick="showTab('all')">
+            ประวัติการเบิกอะไหล่
+          </button>
+          <button class="tab-button" id="tab-pending-calls" onclick="showTab('pending-calls')">
+            อะไหล่จ่ายตาม Call
+          </button>
+        </div>
+        <div id="parts" class="tab-content active">
+          <div id="searchContainer">
+            <input type="text" id="searchInput" placeholder="ค้นหา Code, Description...." />
+            <button id="searchButton" class="refresh-button">
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+          <div id="error-container">
+            <p id="error-message">เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาตรวจสอบการเชื่อมต่อหรือลองใหม่</p>
+            <button id="retry-button">ลองใหม่</button>
+          </div>
+          <div class="table-container">
+            <table id="data-table">
+              <thead>
+                <tr>
+                  <th>เบิก</th>
+                  <th>Image</th>
+                  <th>Material</th>
+                  <th>Description</th>
+                  <th>วิภาวดี</th>
+                  <th>นวนคร</th>
+                  <th>Rebuilt</th>
+                  <th>หมายเหตุ</th>
+                  <th>Product</th>
+                  <th>Spec</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div id="pagination" class="pagination">
+            <button id="firstPage">
+              <i class="fas fa-chevron-left"></i><i class="fas fa-chevron-left"></i>
+            </button>
+            <button id="prevPage"><i class="fas fa-chevron-left"></i></button>
+            <div id="pageNumbers"></div>
+            <button id="nextPage"><i class="fas fa-chevron-right"></i></button>
+            <button id="lastPage">
+              <i class="fas fa-chevron-right"></i><i class="fas fa-chevron-right"></i>
+            </button>
+            <div class="items-per-page">
+              <label for="itemsPerPage">Show</label>
+              <select id="itemsPerPage">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="30">30</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div id="today" class="tab-content">
+          <div id="searchContainer">
+            <input type="text" id="searchInputToday" placeholder="ค้นหา Code, Material, ชื่อช่าง หรือ ทีม..." />
+          </div>
+          <div id="error-container-today" class="error-container" style="display: none;">
+            <p id="error-message-today">เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณาตรวจสอบการเชื่อมต่อหรือลองใหม่</p>
+            <button id="retry-button-today">ลองใหม่</button>
+          </div>
+          <div id="loadingToday" class="spinner-container">
+            <div class="spinner"></div>
+            <p>กำลังโหลดข้อมูล...</p>
+          </div>
+          <div class="table-container">
+            <table id="data-table-today">
+              <thead>
+                <tr>
+                  <th>Status</th>
+                  <th>วันเวลาบันทึก</th>
+                  <th>Material</th>
+                  <th>Description</th>
+                  <th>จำนวน</th>
+                  <th>วิภาวดี</th>
+                  <th>ชื่อช่าง</th>
+                  <th>หน่วยงาน</th>
+                  <th>Call</th>
+                  <th>CallType</th>
+                  <th>หมายเหตุ</th>
+                  <th>ดูรายละเอียด</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div id="detailModal" class="modal">
+            <div class="modal-content">
+              <span class="close" id="closeModal">×</span>
+              <h2>รายละเอียด</h2>
+              <div id="modalContent"></div>
+            </div>
+          </div>
+        </div>
+        <div id="all" class="tab-content">
+          <div id="searchContainerAll">
+            <input type="text" id="searchInputAll" placeholder="ค้นหา Code,Description, ชื่อช่าง หรือ ทีม..." />
+          </div>
+          <div class="all-table-container">
+            <table id="data-table-all">
+              <thead>
+                <tr>
+                  <th>Status</th>
+                  <th class="sortable" data-column="Timestamp">วันเวลา <span class="arrow"></span></th>
+                  <th class="sortable" data-column="Code">Material <span class="arrow"></span></th>
+                  <th class="sortable" data-column="Material Description">Description <span class="arrow"></span></th>
+                  <th>จำนวน</th>
+                  <th class="sortable" data-column="ชื่อช่าง">ชื่อช่าง <span class="arrow"></span></th>
+                  <th>หน่วยงาน</th>
+                  <th>เลขที่Call</th>
+                  <th>CallType</th>
+                  <th class="sortable" data-column="หมายเหตุ">หมายเหตุ <span class="arrow"></span></th>
+                  <th>ดูรายละเอียด</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div id="detailModalAll" class="all-modal">
+            <div class="all-modal-content">
+              <span class="all-close" id="closeModalAll">&times;</span>
+              <h2>รายละเอียด</h2>
+              <div id="modalContentAll"></div>
+            </div>
+          </div>
+          <div class="all-pagination">
+            <button id="firstPageAll"><i class="fas fa-chevron-left"></i><i class="fas fa-chevron-left"></i></button>
+            <button id="prevPageAll"><i class="fas fa-chevron-left"></i></button>
+            <div id="pageNumbersAll"></div>
+            <button id="nextPageAll"><i class="fas fa-chevron-right"></i></button>
+            <button id="lastPageAll">
+              <i class="fas fa-chevron-right"></i><i class="fas fa-chevron-right"></i>
+            </button>
+            <div class="all-items-per-page">
+              <label for="itemsPerPageAll">:</label>
+              <select id="itemsPerPageAll">
+                <option value="10">10 รายการ</option>
+                <option value="20">20 รายการ</option>
+                <option value="30">30 รายการ</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div id="pending-calls" class="tab-content">
+          <div id="searchContainerPending">
+            <div class="pending-filter-row">
+              <label id="teamFilterLabelPending" for="teamFilterPending" class="pending-modern-label">เลือกทีม</label>
+              <select id="teamFilterPending">
+                <option value="">ทั้งหมด</option>
+              </select>
+              <div id="callCountInfoPending" class="pending-call-count-box">
+                จำนวน Ticket ค้าง <span id="callCountValuePending">0</span> Call
+              </div>
+            </div>
+            <div class="pending-search-row">
+              <input type="text" id="searchInputPending" placeholder="ค้นหา Ticket, Team, สาขา, ค้างหน่วยงาน, Material, Description..." />
+              <button id="searchButtonPending"><i class="fas fa-search"></i></button>
+            </div>
+          </div>
+          <div class="pending-table-container">
+            <table id="data-table-pending">
+              <thead>
+                <tr>
+                  <th class="sortable" data-column="DateTime">วันที่แจ้ง <span class="pending-arrow"></span></th>
+                  <th class="sortable" data-column="Ticket Number">Ticket <span class="pending-arrow"></span></th>
+                  <th class="sortable" data-column="Team">Team <span class="pending-arrow"></span></th>
+                  <th class="sortable" data-column="Brand">สาขา <span class="pending-arrow"></span></th>
+                  <th class="sortable" data-column="ค้างหน่วยงาน">ค้างหน่วยงาน <span class="pending-arrow"></span></th>
+                  <th class="sortable" data-column="Material">Material <span class="pending-arrow"></span></th>
+                  <th class="sortable" data-column="Description">Description <span class="pending-arrow"></span></th>
+                  <th class="sortable" data-column="Vipa">คงเหลือ <span class="pending-arrow"></span></th>
+                  <th class="sortable" data-column="DayRepair">ค้าง(วัน) <span class="pending-arrow"></span></th>
+                  <th>ดูรายละเอียด</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div id="detailModalPending" class="pending-modal">
+            <div class="pending-modal-content">
+              <span class="pending-close" id="closeModalPending">×</span>
+              <h2>รายละเอียด</h2>
+              <div id="modalContentPending"></div>
+            </div>
+          </div>
+          <div class="pending-pagination">
+            <button id="firstPagePending"><i class="fas fa-chevron-left"></i><i class="fas fa-chevron-left"></i></button>
+            <button id="prevPagePending"><i class="fas fa-chevron-left"></i></button>
+            <div id="pageNumbersPending"></div>
+            <button id="nextPagePending"><i class="fas fa-chevron-right"></i></button>
+            <button id="lastPagePending">
+              <i class="fas fa-chevron-right"></i><i class="fas fa-chevron-right"></i>
+            </button>
+            <div class="pending-items-per-page">
+              <label for="itemsPerPagePending">รายการต่อหน้า:</label>
+              <select id="itemsPerPagePending">
+                <option value="10">10 รายการ</option>
+                <option value="20" selected>20 รายการ</option>
+                <option value="30">30 รายการ</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <p>© 2025 คลังสินค้า SparePart วิภาวดี 62 | สงวนลิขสิทธิ์</p>
+      </div>
+    </div>
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="js/script.js"></script>
+  </body>
+</html>
