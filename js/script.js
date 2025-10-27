@@ -1,5 +1,6 @@
 // Global employee data
 let employeeData = [];
+
 // Login System
 const loginModal = document.getElementById('loginModal');
 const appContent = document.getElementById('appContent');
@@ -10,12 +11,14 @@ const loginError = document.getElementById('loginError');
 const rememberMeCheckbox = document.getElementById('rememberMe');
 const togglePasswordIcon = document.getElementById('togglePassword');
 const userNameSmall = document.getElementById('userNameSmall');
+
 function togglePasswordVisibility() {
   const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
   passwordInput.setAttribute('type', type);
   togglePasswordIcon.classList.toggle('fa-eye-slash');
   togglePasswordIcon.classList.toggle('fa-eye');
 }
+
 async function loadEmployeeData() {
   const employeeSheetID = "1eqVoLsZxGguEbRCC5rdI4iMVtQ7CK4T3uXRdx8zE3uw";
   const employeeSheetName = "Employee";
@@ -32,6 +35,7 @@ async function loadEmployeeData() {
     throw error;
   }
 }
+
 async function handleLogin() {
   const username = usernameInput.value.trim();
   const password = passwordInput.value.trim();
@@ -73,6 +77,7 @@ async function handleLogin() {
     console.error('Login error:', error);
   }
 }
+
 function checkLoginStatus() {
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
   const savedUsername = localStorage.getItem('username');
@@ -103,6 +108,7 @@ function checkLoginStatus() {
     rememberMeCheckbox.checked = true;
   }
 }
+
 function handleLogout() {
   localStorage.removeItem('isLoggedIn');
   localStorage.removeItem('username');
@@ -112,14 +118,17 @@ function handleLogout() {
   localStorage.removeItem('rememberMe');
   checkLoginStatus();
 }
+
 // Allow Enter key for login
 passwordInput.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
     handleLogin();
   }
 });
+
 // Initial check on load
 checkLoginStatus();
+
 function showTab(tabId) {
   const buttons = document.querySelectorAll(".tab-button");
   const contents = document.querySelectorAll(".tab-content");
@@ -143,9 +152,11 @@ function showTab(tabId) {
   }
   hideLoading();
 }
+
 function hideLoading() {
   document.getElementById("loading").style.display = "none";
 }
+
 function showQRCode() {
   Swal.fire({
     title: '📷 สแกน QR Code',
@@ -161,6 +172,7 @@ function showQRCode() {
     }
   });
 }
+
 // Parts tab script (original)
 const sheetID = "1nbhLKxs7NldWo_y0s4qZ8rlpIfyyGkR_Dqq8INmhYlw";
 const sheetName = "MainSap";
@@ -181,16 +193,19 @@ let allData = [];
 let currentPage = 1;
 let itemsPerPage = 10;
 let currentFilteredData = [];
+
 itemsPerPageSelect.addEventListener("change", () => {
   itemsPerPage = parseInt(itemsPerPageSelect.value, 10);
   currentPage = 1;
   renderTableData();
   renderPagination(allData.length);
 });
+
 retryButton.addEventListener("click", () => {
   errorContainer.style.display = "none";
   loadData();
 });
+
 function renderTable(data) {
   if (!tableBody) {
     console.error("Table body for #data-table not found");
@@ -282,6 +297,7 @@ function renderTable(data) {
     tableBody.appendChild(tr);
   });
 }
+
 async function showRequisitionDialog(row) {
   document.body.style.overflow = 'hidden';
   const history = {
@@ -598,14 +614,15 @@ async function showRequisitionDialog(row) {
         isValid = false;
       }
       const hasRemark = remarkInput.value.trim().length > 0;
+      const callValue = callNumberInput.value.trim(); // Fixed: Trim and store in var to avoid repeated access
       if (!hasRemark) {
-        if (!callNumberInput.value) {
+        if (!callValue) {
           errors.callNumberError.textContent = 'กรุณากรอกเลขที่ Call';
           callNumberInput.classList.add('invalid-input');
           isValid = false;
         } else if (
-          (callNumberInput.value.startsWith('2') && callNumberInput.value.length !== 11) ||
-          (!callNumberInput.value.startsWith('2') && callNumberInput.value.length !== 7)
+          (callValue.startsWith('2') && callValue.length !== 11) ||
+          (!callValue.startsWith('2') && callValue.length !== 7)
         ) {
           errors.callNumberError.textContent = 'เลขที่ Call ต้องขึ้นต้นด้วย 2 (11 ตัวอักษร) หรือ (7 ตัวอักษร)';
           callNumberInput.classList.add('invalid-input');
@@ -621,8 +638,8 @@ async function showRequisitionDialog(row) {
         const employee = employeeData.find(e => e.IDRec && e.IDRec.toString().trim() === employeeCode);
         saveToLocalStorage('employeeCode', employeeCode);
         saveToLocalStorage('contact', contactInput.value);
-        if (callNumberInput.value) {
-          saveToLocalStorage('callNumber', callNumberInput.value);
+        if (callValue) {
+          saveToLocalStorage('callNumber', callValue);
         }
         if (callTypeInput.value) {
           saveToLocalStorage('callType', callTypeInput.value);
@@ -633,7 +650,7 @@ async function showRequisitionDialog(row) {
           employeeName: employee ? employee.Name : '',
           team: employee ? (employee.หน่วยงาน || '') : '',
           contact: contactInput.value,
-          callNumber: callNumberInput.value,
+          callNumber: callValue,
           callType: callTypeInput.value,
           remark: remarkInput.value
         };
@@ -896,8 +913,9 @@ async function showRequisitionDialog(row) {
         }
       }
     }
-  }
-});
+  });
+}
+
 function saveToLocalStorage(key, value) {
   let items = JSON.parse(localStorage.getItem(key)) || [];
   if (!items.includes(value)) {
@@ -906,9 +924,11 @@ function saveToLocalStorage(key, value) {
     localStorage.setItem(key, JSON.stringify(items));
   }
 }
+
 function getFromLocalStorage(key) {
   return JSON.parse(localStorage.getItem(key)) || [];
 }
+
 function renderPagination(totalItems) {
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   pageNumbers.innerHTML = "";
@@ -936,16 +956,19 @@ function renderPagination(totalItems) {
   nextPageButton.disabled = currentPage === totalPages;
   lastPageButton.disabled = currentPage === totalPages;
 }
+
 function changePage(page) {
   currentPage = page;
   renderTableData();
   renderPagination(currentFilteredData.length);
 }
+
 function renderTableData() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   renderTable(currentFilteredData.slice(startIndex, endIndex));
 }
+
 searchButton.addEventListener("click", () => {
   const keyword = searchInput.value.trim().toLowerCase();
   if (!keyword) {
@@ -972,17 +995,20 @@ searchButton.addEventListener("click", () => {
   renderTableData();
   renderPagination(currentFilteredData.length);
 });
+
 searchInput.addEventListener("keypress", (e) => {
   if (e.key === "Enter") {
     searchButton.click();
     searchInput.blur();
   }
 });
+
 firstPageButton.addEventListener("click", () => {
   currentPage = 1;
   renderTableData();
   renderPagination(currentFilteredData.length);
 });
+
 prevPageButton.addEventListener("click", () => {
   if (currentPage > 1) {
     currentPage--;
@@ -990,6 +1016,7 @@ prevPageButton.addEventListener("click", () => {
     renderPagination(currentFilteredData.length);
   }
 });
+
 nextPageButton.addEventListener("click", () => {
   const totalPages = Math.ceil(currentFilteredData.length / itemsPerPage);
   if (currentPage < totalPages) {
@@ -998,12 +1025,14 @@ nextPageButton.addEventListener("click", () => {
     renderPagination(currentFilteredData.length);
   }
 });
+
 lastPageButton.addEventListener("click", () => {
   const totalPages = Math.ceil(currentFilteredData.length / itemsPerPage);
   currentPage = totalPages;
   renderTableData();
   renderPagination(currentFilteredData.length);
 });
+
 async function loadData() {
   document.getElementById("loading").style.display = "flex";
   errorContainer.style.display = "none";
@@ -1043,6 +1072,7 @@ async function loadData() {
     });
   }
 }
+
 // Today tab script (original)
 const sheetIDToday = "1fPzWLyR0xqU30gyIMSuSCuglKEr76AT1ekCR3mY-nrU";
 const sheetNameToday = "ReQuesttoday";
@@ -1055,18 +1085,22 @@ const tableBodyToday = document.querySelector("#data-table-today tbody");
 const errorContainerToday = document.getElementById("error-container-today");
 const retryButtonToday = document.getElementById("retry-button-today");
 let allDataToday = [];
+
 retryButtonToday.addEventListener("click", () => {
   errorContainerToday.style.display = "none";
   loadTodayData();
 });
+
 closeModal.onclick = () => {
   modal.style.opacity = "0";
   modal.style.transform = "scale(0.95)";
   setTimeout(() => (modal.style.display = "none"), 300);
 };
+
 window.onclick = (event) => {
   if (event.target == modal) closeModal.click();
 };
+
 function renderTableToday(data) {
   tableBodyToday.innerHTML = "";
   data.forEach((row) => {
@@ -1160,6 +1194,7 @@ function renderTableToday(data) {
     tableBodyToday.appendChild(tr);
   });
 }
+
 searchInputToday.addEventListener("input", (e) => {
   const keyword = e.target.value.toLowerCase();
   const filtered = allDataToday.filter((row) => {
@@ -1172,6 +1207,7 @@ searchInputToday.addEventListener("input", (e) => {
   });
   renderTableToday(filtered);
 });
+
 async function loadTodayData() {
   document.getElementById("loading").style.display = "flex";
   document.getElementById("loadingToday").style.display = "block";
@@ -1221,6 +1257,7 @@ async function loadTodayData() {
     });
   }
 }
+
 // All tab script
 const sheetIDAll = '1fPzWLyR0xqU30gyIMSuSCuglKEr76AT1ekCR3mY-nrU';
 const sheetNameAll = 'ReQuestHistory';
@@ -1239,15 +1276,19 @@ const itemsPerPageSelectAll = document.getElementById("itemsPerPageAll");
 let allDataAll = [];
 let currentPageAll = 1;
 let itemsPerPageAll = parseInt(itemsPerPageSelectAll.value);
+
 closeModalAll.onclick = () => modalAll.style.display = "none";
+
 window.onclick = event => {
   if (event.target == modalAll) modalAll.style.display = "none";
 };
+
 itemsPerPageSelectAll.addEventListener("change", (e) => {
   itemsPerPageAll = parseInt(e.target.value);
   currentPageAll = 1;
   renderTableAll(allDataAll);
 });
+
 function renderTableAll(data) {
   tableBodyAll.innerHTML = '';
   const startIdx = (currentPageAll - 1) * itemsPerPageAll;
@@ -1284,6 +1325,7 @@ function renderTableAll(data) {
   });
   updatePaginationAll(data);
 }
+
 function updatePaginationAll(data) {
   const totalPages = Math.ceil(data.length / itemsPerPageAll);
   pageNumbersContainerAll.innerHTML = '';
@@ -1300,11 +1342,13 @@ function updatePaginationAll(data) {
     pageNumbersContainerAll.appendChild(pageNumberButton);
   }
 }
+
 // ปุ่มเลื่อนไปหน้าแรก
 firstPageButtonAll.onclick = () => {
   currentPageAll = 1;
   renderTableAll(allDataAll);
 };
+
 // ปุ่มย้อนกลับ
 prevPageButtonAll.onclick = () => {
   if (currentPageAll > 1) {
@@ -1312,6 +1356,7 @@ prevPageButtonAll.onclick = () => {
     renderTableAll(allDataAll);
   }
 };
+
 // ปุ่มไปหน้า next
 nextPageButtonAll.onclick = () => {
   const totalPages = Math.ceil(allDataAll.length / itemsPerPageAll);
@@ -1320,11 +1365,13 @@ nextPageButtonAll.onclick = () => {
     renderTableAll(allDataAll);
   }
 };
+
 // ปุ่มไปหน้าสุดท้าย
 lastPageButtonAll.onclick = () => {
   currentPageAll = Math.ceil(allDataAll.length / itemsPerPageAll);
   renderTableAll(allDataAll);
 };
+
 searchInputAll.addEventListener("input", e => {
   const keyword = e.target.value.toLowerCase();
   const filtered = allDataAll.filter(row => {
@@ -1338,6 +1385,7 @@ searchInputAll.addEventListener("input", e => {
   });
   renderTableAll(filtered);
 });
+
 function loadAllData() {
   fetch(urlAll)
     .then(response => response.json())
@@ -1349,6 +1397,7 @@ function loadAllData() {
       console.error("ไม่สามารถโหลดข้อมูลได้:", error);
     });
 }
+
 // Pending-calls tab script
 const sheetIDPending = '1dzE4Xjc7H0OtNUmne62u0jFQT-CiGsG2eBo-1v6mrZk';
 const sheetNamePending = 'Call_Report';
@@ -1370,25 +1419,31 @@ let allDataPending = [];
 let currentPagePending = 1;
 let itemsPerPagePending = 20;
 let sortConfigPending = { column: null, direction: 'asc' };
+
 closeModalPending.onclick = () => modalPending.style.display = "none";
+
 window.onclick = event => {
   if (event.target == modalPending) modalPending.style.display = "none";
 };
+
 itemsPerPageSelectPending.addEventListener("change", (e) => {
   itemsPerPagePending = parseInt(e.target.value);
   currentPagePending = 1; // รีเซ็ตหน้าเมื่อเปลี่ยนจำนวนรายการต่อหน้า
   filterAndRenderTablePending();
 });
+
 searchInputPending.addEventListener("keypress", (e) => {
   if (e.key === "Enter") {
     currentPagePending = 1; // รีเซ็ตหน้าเมื่อค้นหาใหม่
     filterAndRenderTablePending();
   }
 });
+
 searchButtonPending.addEventListener("click", () => {
   currentPagePending = 1; // รีเซ็ตหน้าเมื่อค้นหาใหม่
   filterAndRenderTablePending();
 });
+
 function populateTeamFilterPending(data) {
   const filteredData = data.filter(row => {
     const vipa = Number(row["Vipa"] || 0);
@@ -1414,6 +1469,7 @@ function populateTeamFilterPending(data) {
     });
   }
 }
+
 function addSortListenersPending() {
   const sortableHeaders = document.querySelectorAll("#pending-calls th.sortable");
   sortableHeaders.forEach(header => {
@@ -1430,6 +1486,7 @@ function addSortListenersPending() {
     });
   });
 }
+
 function updateSortArrowsPending() {
   const sortableHeaders = document.querySelectorAll("#pending-calls th.sortable");
   sortableHeaders.forEach(header => {
@@ -1442,6 +1499,7 @@ function updateSortArrowsPending() {
     }
   });
 }
+
 function filterAndRenderTablePending() {
   const selectedTeam = teamFilterPending.value;
   const keyword = searchInputPending.value.toLowerCase().trim();
@@ -1486,21 +1544,25 @@ function filterAndRenderTablePending() {
   renderTablePending(filteredData);
   updateCallCountPending(filteredData);
 }
+
 teamFilterPending.addEventListener("change", () => {
   currentPagePending = 1; // รีเซ็ตหน้าเมื่อเปลี่ยนทีม
   filterAndRenderTablePending();
 });
+
 function updateCallCountPending(data) {
   const uniqueTickets = [...new Set(data.map(row => row["Ticket Number"]))];
   const count = uniqueTickets.length;
   const callCountValue = document.getElementById("callCountValuePending");
   callCountValue.textContent = count;
 }
+
 function formatDateTimePending(dateTime) {
   if (!dateTime) return "";
   const datePart = dateTime.split(" ")[0];
   return datePart;
 }
+
 function renderTablePending(data) {
   tableBodyPending.innerHTML = '';
   const startIdx = (currentPagePending - 1) * itemsPerPagePending;
@@ -1580,6 +1642,7 @@ function renderTablePending(data) {
   });
   updatePaginationPending(data);
 }
+
 function updatePaginationPending(data) {
   const totalPages = Math.ceil(data.length / itemsPerPagePending);
   pageNumbersContainerPending.innerHTML = '';
@@ -1607,16 +1670,19 @@ function updatePaginationPending(data) {
   nextPageButtonPending.disabled = currentPagePending === totalPages;
   lastPageButtonPending.disabled = currentPagePending === totalPages;
 }
+
 firstPageButtonPending.onclick = () => {
   currentPagePending = 1;
   filterAndRenderTablePending();
 };
+
 prevPageButtonPending.onclick = () => {
   if (currentPagePending > 1) {
     currentPagePending--;
     filterAndRenderTablePending();
   }
 };
+
 nextPageButtonPending.onclick = () => {
   const totalPages = Math.ceil(allDataPending.filter(row => {
     const pendingDept = (row["ค้างหน่วยงาน"] || "").toLowerCase();
@@ -1629,6 +1695,7 @@ nextPageButtonPending.onclick = () => {
     filterAndRenderTablePending();
   }
 };
+
 lastPageButtonPending.onclick = () => {
   currentPagePending = Math.ceil(allDataPending.filter(row => {
     const pendingDept = (row["ค้างหน่วยงาน"] || "").toLowerCase();
@@ -1638,6 +1705,7 @@ lastPageButtonPending.onclick = () => {
   }).length / itemsPerPagePending);
   filterAndRenderTablePending();
 };
+
 function loadPendingCallsData() {
   fetch(urlPending)
     .then(response => response.json())
@@ -1652,6 +1720,21 @@ function loadPendingCallsData() {
       tableBodyPending.innerHTML = '<tr><td colspan="10" class="pending-text-center">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
     });
 }
+
+// Event listeners for buttons (to replace onclick attributes in HTML for better practice)
+// Note: Update HTML to remove onclick and add IDs if needed, e.g., <button id="loginBtn"> for login button
+document.addEventListener('DOMContentLoaded', () => {
+  const loginBtn = document.getElementById('loginBtn'); // Assume ID added in HTML
+  if (loginBtn) {
+    loginBtn.addEventListener('click', handleLogin);
+  }
+  const toggleBtn = document.getElementById('togglePassword');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', togglePasswordVisibility);
+  }
+  // Add similar for other onclicks if any
+});
+
 // Auto-load default data if logged in
 if (appContent.classList.contains('logged-in')) {
   loadData();
